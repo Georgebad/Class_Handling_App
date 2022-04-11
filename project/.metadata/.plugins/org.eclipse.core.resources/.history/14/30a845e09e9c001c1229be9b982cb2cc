@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>List Courses</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css" />
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container text-center">
+    <div>
+        <h1>List of courses</h1>
+    </div>
+     
+    <div>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark" >
+                <tr>
+                    <th>CourseID</th>
+                    <th>Name</th>
+                    <th>Syllabus</th>
+                    <th>Year</th>
+                    <th>Semester</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="course: ${listcourses}">
+                    <td th:text="${course.getcourseid()}">CourseID</td>
+                    <td th:text="${course.getcoursename()}">Name</td>
+                    <td th:text="${course.getsyllabus()}">Syllabus</td>
+                    <td th:text="${course.getyear()}">Year</td>
+                    <td th:text="${course.getsemester()}">Semester</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div>
+    	<form th:action="@{/logout}" method="post">
+          
+            <input type="submit" class="submit" value="Sign Out" />
+        </form>
+    </div>
+</div>
+</body>
+<style>
+	.submit {
+	border:none;
+    background: #d4af7a;
+    text-transform: uppercase;
+    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+    display: block;
+    margin: 0 auto;
+    width: 120px;
+    height: 36px;
+    border-radius: 30px;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+}
+</style>
+</html>
