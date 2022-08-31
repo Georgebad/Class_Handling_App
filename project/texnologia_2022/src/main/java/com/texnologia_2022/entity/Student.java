@@ -29,11 +29,15 @@ public class Student {
 	@Column
 	private Long project;
 	
-	@Column
+	@Column(nullable=false)
 	private Long course;
 	
 	@Column
 	private Float final_grade;
+
+	@ManyToOne(fetch =FetchType.LAZY, optional =false)
+	@JoinColumn(name="course",insertable=false, updatable=false)
+	private Course courses;
 	
 	//getters
 	public Long getid() {

@@ -13,6 +13,6 @@ public interface StudentRepo extends JpaRepository<Student, Long> {
 	    public List<Student> findByCourse(Long courseid);
 	
 	@Modifying  
-	@Query("SELECT final_grade FROM Student students")
-	    public List<Double> find_grades();
+	@Query("SELECT final_grade FROM Student students WHERE course=?1")
+	    public List<Double> find_grades(long id);
 }

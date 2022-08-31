@@ -1,5 +1,7 @@
 package com.texnologia_2022.entity;
 
+import java.util.Set;
+
 import javax.persistence.*;
 
 
@@ -33,7 +35,10 @@ public class Course {
     
     @Column
     private Float exams_per;
-	
+    
+	@OneToMany(mappedBy="course",fetch=FetchType.LAZY,
+			cascade =CascadeType.ALL)
+	private Set<Student> student;
     //getters
     public Long getid() {
     	return id;

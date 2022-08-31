@@ -14,19 +14,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.texnologia_2022.dao.UserRepo;
+
 import com.texnologia_2022.entity.Course;
 import com.texnologia_2022.entity.Student;
 import com.texnologia_2022.entity.User;
 import com.texnologia_2022.service.CourseService;
 import com.texnologia_2022.service.StudentService;
+import com.texnologia_2022.service.UserService;
+
 import java.util.List;
+import java.util.Optional;
 
 
 @Controller
 public class AppController {
 	@Autowired
-    private UserRepo userRepo;
+    private UserService user_service;
 	@Autowired
     private CourseService course_service;
 	@Autowired
@@ -35,6 +38,7 @@ public class AppController {
 	@GetMapping("")
     public String showRegistrationForm(Model model) {
         model.addAttribute("user", new User());
+        
         return "login_page";
     }
     @GetMapping("/login_page")
@@ -44,13 +48,13 @@ public class AppController {
         return "login_page";
     }
     @PostMapping("/process_register")
-    public String processRegister(User user) {
+    public String processRegister(User user, Model model) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
-        userRepo.save(user);
-         
-        return "home_page";
+        user_service.save_user(user);
+        
+        return "login_page";
     }	 
     @GetMapping("/home_page")
     public String listcourses(Model model) {
@@ -58,7 +62,7 @@ public class AppController {
         String name = auth.getName();
         List<Course> listcourses = course_service.from_user(name);
         model.addAttribute("listcourses", listcourses);
-        
+    
         return "home_page";
     }
     @GetMapping("/new_course")
@@ -72,11 +76,13 @@ public class AppController {
         String name = auth.getName();
     	course.setusername(name);
         course_service.save_course(course);
+        
     	return "redirect:/home_page";
     }
     @RequestMapping("/delete_course/{id}")
     public String deleteCourse(@PathVariable(name = "id") Long id) {
     	course_service.delete_course(id);
+    	
     	return "redirect:/home_page";
     }
     @RequestMapping("/edit_course/{id}")
@@ -84,6 +90,7 @@ public class AppController {
         ModelAndView mav = new ModelAndView("edit_course");
         Course course = course_service.get_course(id);
         mav.addObject("course", course);
+        
         return mav;
     }
     @RequestMapping("/save_course/{id}")
@@ -93,6 +100,7 @@ public class AppController {
     	course.setusername(name);
     	course.setid(id);
     	course_service.save_course(course);   
+    	
         return "redirect:/home_page";
     }
     
@@ -104,7 +112,7 @@ public class AppController {
         Course course=course_service.get_course(id);
         model.addAttribute("course",course);
         
-        List<Double> grades=student_service.get_grades();
+        List<Double> grades=student_service.get_grades(id);
         DescriptiveStatistics ds=student_service.performOperation(grades);
         model.addAttribute("ds",ds);
         
@@ -114,17 +122,15 @@ public class AppController {
     public String newStudent(Model model,@PathVariable(name = "id") Long id) {
     	Course course=course_service.get_course(id);
     	model.addAttribute("course",course);
+    	
     	return "addstudent";
     }
-    @PostMapping("/register_student{id}")
-    public String registerStudent(Student student,@PathVariable(name = "id") Long id) {
+    @PostMapping("/register_student{c_id}")
+    public String registerStudent(Student student,@PathVariable(name = "c_id") Long id) {
     	student.setcourse(id);
     	Course course=course_service.get_course(id);
-    	Float projectp=course.getproject_per();
-    	Float examsp=course.getexams_per();
-    	Float grade=projectp*student.getproject() + examsp*student.getf_exam();
-    	student.setfinal_grade(grade);
-        student_service.save_student(student);
+    	student_service.calculate_final(student,course.getproject_per(),course.getexams_per());
+    	
     	return "redirect:/details/"+ id;
     }
     @RequestMapping("/delete_student/{id}")
@@ -132,6 +138,7 @@ public class AppController {
     	Student student = student_service.get_student(id);
     	Long temp=student.getcourse();
     	student_service.delete_student(id);
+    	
     	return "redirect:/details/"+ temp;
     }
     @RequestMapping("/edit_student/{id}")
@@ -139,6 +146,7 @@ public class AppController {
         ModelAndView mav = new ModelAndView("edit_student_p");
         Student student = student_service.get_student(id);
         mav.addObject("student", student);
+        
         return mav;
     }
     @RequestMapping("/save_student/{id}")
@@ -148,11 +156,8 @@ public class AppController {
     	student.setid(id);
     	student.setcourse(course_id);
     	Course course=course_service.get_course(course_id);
-    	Float projectp=course.getproject_per();
-    	Float examsp=course.getexams_per();
-    	Float grade=projectp*student.getproject() + examsp*student.getf_exam();
-    	student.setfinal_grade(grade);
-    	student_service.save_student(student);   
+    	student_service.calculate_final(student,course.getproject_per(),course.getexams_per());  
+    	
         return "redirect:/details/" + course_id;
     }
 }

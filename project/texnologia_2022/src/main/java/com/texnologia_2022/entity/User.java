@@ -18,7 +18,9 @@ public class User {
     
     @Column
     private String password;
-	
+    
+    
+	//getters
     public Long getid() {
     	return id;
     }
@@ -31,6 +33,8 @@ public class User {
     public String getPassword() {
     	return password;
     }
+    
+    //setters
     public void setEmail(String inp) {
     	this.email=inp;
     }
